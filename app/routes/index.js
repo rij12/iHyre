@@ -24,14 +24,12 @@ router.get('/', function(req, response, next) {
   const id = toSingleQuotes(JSON.stringify(req.query.id));
   const query = `SELECT * FROM messages WHERE id = ${id};`;
 
-
   client.query(query, (err, result) => {
     if (err) {
       response.sendStatus(500)
     } else {
       response.status(200).send(result.rows[0].message)
     }
-    client.end()
   })
 });
 
@@ -48,7 +46,6 @@ router.post('/', function(req, response, next) {
     } else {
       response.status(201).send(id)
     }
-    client.end()
   });
 });
 
