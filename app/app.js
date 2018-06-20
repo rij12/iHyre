@@ -1,19 +1,26 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const {
+  Client
+} = require('pg')
+const config = require("./config/config")
+
 
 // Routers
-var indexRouter = require('./routes/index');
+const indexRouter = require('./routes/index');
 
-var app = express();
+const app = express();
 
-app.listen(3000, function() { console.log('Listening on port 3000'); });
+app.listen(3000, function() {
+  console.log('Listening on port 3000');
+});
 
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
@@ -33,5 +40,37 @@ app.use(function(err, req, res, next) {
   // render the error page
   res.status(err.status || 500);
 });
+
+
+const createTable = function() {
+
+  // Connection to DB
+  const client = new Client({
+    user: config.db.username,
+    host: config.db.host,
+    database: config.db.database,
+    password: config.db.password,
+    port: config.db.port
+  });
+
+  // Connect to client.
+  client.connect();
+
+  const createTableQuery = "CREATE TABLE IF NOT EXISTS messages (" +
+    "id text primary key," +
+    "message text " +
+    ");";
+
+  client.query(createTableQuery, (err, result) => {
+    if (err) {
+      console.error("Could not create database table messages")
+      process.exit(1);
+    }
+    client.end()
+  });
+}
+
+// Create table if it does not already exist.
+createTable()
 
 module.exports = app;

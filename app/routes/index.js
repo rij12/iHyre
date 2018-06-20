@@ -1,16 +1,19 @@
 const express = require('express');
-const {Pool, Client} = require('pg')
+const {
+  Client
+} = require('pg')
 const toSingleQuotes = require('to-single-quotes');
 const router = express.Router();
 const uuid = require('uuid');
+const config = require("../config/config")
 
 // Connection to DB
 const client = new Client({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'postgres',
-  password: null,
-  port: 5432,
+  user: config.db.username,
+  host: config.db.host,
+  database: config.db.database,
+  password: config.db.password,
+  port: config.db.port
 });
 
 // Connect to client.
@@ -21,7 +24,8 @@ router.get('/', function(req, response, next) {
   const id = toSingleQuotes(JSON.stringify(req.query.id));
   const query = `SELECT * FROM messages WHERE id = ${id};`;
 
-  client.query(query,(err, result) => {
+
+  client.query(query, (err, result) => {
     if (err) {
       response.sendStatus(500)
     } else {
